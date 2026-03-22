@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EduPortal — Sign In</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .auth-page {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    /* LEFT PANEL */
+    .auth-left {
+      background: linear-gradient(145deg, #0a1628 0%, #0e1f3d 50%, #091220 100%);
+      border-right: 1px solid var(--card-border);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 40px 48px 48px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .auth-left::before {
+      content: '';
+      position: absolute;
+      top: -100px; left: -100px;
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(47,128,237,0.15) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .auth-left::after {
+      content: '';
+      position: absolute;
+      bottom: -80px; right: -80px;
+      width: 300px; height: 300px;
+      background: radial-gradient(circle, rgba(0,201,167,0.1) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .auth-brand {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--white);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .auth-brand .dot {
+      width: 8px; height: 8px;
+      background: var(--blue);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--blue);
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+
+    .auth-left-content {
+      position: relative;
+      z-index: 1;
+    }
+
+    .auth-left-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: rgba(47,128,237,0.12);
+      border: 1px solid rgba(47,128,237,0.3);
+      color: var(--blue-bright);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: 20px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+    }
+
+    .auth-left-title {
+      font-family: var(--font-display);
+      font-size: clamp(28px, 3.5vw, 42px);
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -1px;
+      margin-bottom: 16px;
+    }
+
+    .auth-left-title .highlight {
+      background: linear-gradient(135deg, var(--blue-bright), var(--teal));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .auth-left-sub {
+      font-size: 15px;
+      color: var(--off-white);
+      font-weight: 300;
+      line-height: 1.7;
+      margin-bottom: 40px;
+    }
+
+    /* TESTIMONIAL CARD */
+    .testimonial {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: var(--radius-md);
+      padding: 22px 24px;
+    }
+
+    .testimonial-text {
+      font-size: 14px;
+      color: var(--off-white);
+      font-weight: 300;
+      line-height: 1.65;
+      margin-bottom: 16px;
+      font-style: italic;
+    }
+
+    .testimonial-author {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .testimonial-avatar {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: rgba(47,128,237,0.2);
+      border: 1px solid rgba(47,128,237,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--blue-bright);
+    }
+
+    .testimonial-name {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--white);
+    }
+
+    .testimonial-role {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .auth-left-footer {
+      font-size: 12px;
+      color: var(--muted);
+      position: relative;
+      z-index: 1;
+    }
+
+    /* RIGHT PANEL */
+    .auth-right {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 40px;
+      background: var(--navy);
+    }
+
+    .auth-form-wrap {
+      width: 100%;
+      max-width: 400px;
+      animation: fadeUp 0.5s ease both;
+    }
+
+    .auth-form-title {
+      font-family: var(--font-display);
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 6px;
+    }
+
+    .auth-form-sub {
+      font-size: 14px;
+      color: var(--muted);
+      margin-bottom: 32px;
+    }
+
+    .auth-form-sub a {
+      color: var(--blue-bright);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .auth-form-sub a:hover { text-decoration: underline; }
+
+    /* PASSWORD TOGGLE */
+    .password-wrap { position: relative; }
+    .password-wrap .form-input { padding-right: 44px; }
+
+    .pw-toggle {
+      position: absolute;
+      right: 13px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--muted);
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      transition: color var(--transition);
+    }
+    .pw-toggle:hover { color: var(--off-white); }
+
+    /* REMEMBER + FORGOT ROW */
+    .login-options {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 22px;
+      font-size: 13px;
+    }
+
+    .remember-row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      color: var(--muted);
+    }
+
+    .remember-row input[type="checkbox"] {
+      accent-color: var(--blue);
+      width: 14px; height: 14px;
+      cursor: pointer;
+    }
+
+    .forgot-link {
+      color: var(--blue-bright);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color var(--transition);
+    }
+    .forgot-link:hover { color: var(--white); }
+
+    /* API ERROR */
+    .api-error {
+      display: none;
+      background: rgba(255,92,92,0.08);
+      border: 1px solid rgba(255,92,92,0.25);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      font-size: 13px;
+      color: #ff8f8f;
+      margin-bottom: 18px;
+      line-height: 1.5;
+    }
+    .api-error.show { display: block; }
+
+    /* WELCOME BACK BANNER */
+    .welcome-banner {
+      display: none;
+      background: rgba(0,201,167,0.08);
+      border: 1px solid rgba(0,201,167,0.25);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      font-size: 13px;
+      color: var(--teal);
+      margin-bottom: 18px;
+    }
+    .welcome-banner.show { display: block; }
+
+    /* DIVIDER */
+    .auth-divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 20px 0;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .auth-divider::before,
+    .auth-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--card-border);
+    }
+
+    @media (max-width: 768px) {
+      .auth-page { grid-template-columns: 1fr; }
+      .auth-left { display: none; }
+      .auth-right { padding: 32px 20px; align-items: flex-start; padding-top: 60px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="auth-page">
+
+  <!-- LEFT PANEL -->
+  <div class="auth-left">
+    <a class="auth-brand" href="index.html">
+      <div class="dot"></div>
+      EduPortal
+    </a>
+
+    <div class="auth-left-content">
+      <div class="auth-left-tag">Welcome Back</div>
+      <h1 class="auth-left-title">
+        Good to see you<br>
+        <span class="highlight">again.</span>
+      </h1>
+      <p class="auth-left-sub">
+        Sign in to access your enrolled courses,
+        track your progress, and continue learning.
+      </p>
+
+      <div class="testimonial">
+        <div class="testimonial-text">
+          "EduPortal completely changed my career path.
+          The Java Full Stack course was exactly what I needed
+          to land my first developer job."
+        </div>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar">RK</div>
+          <div>
+            <div class="testimonial-name">Ravi Kumar</div>
+            <div class="testimonial-role">Java Developer · Enrolled 2025</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="auth-left-footer">© 2025 EduPortal. All rights reserved.</div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="auth-right">
+    <div class="auth-form-wrap">
+
+      <h2 class="auth-form-title">Sign in to EduPortal</h2>
+      <p class="auth-form-sub">
+        Don't have an account?
+        <a href="register.html">Create one free →</a>
+      </p>
+
+      <!-- Welcome back banner (shown if coming from register) -->
+      <div class="welcome-banner" id="welcome-banner">
+        ✓ Account created! Sign in with your new credentials.
+      </div>
+
+      <div class="api-error" id="api-error"></div>
+
+      <div class="form-group">
+        <label class="form-label">Email Address *</label>
+        <input class="form-input" type="email" id="l-email"
+               placeholder="you@example.com" autocomplete="email" />
+        <div class="form-hint" id="hint-l-email">Enter a valid email.</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Password *</label>
+        <div class="password-wrap">
+          <input class="form-input" type="password" id="l-password"
+                 placeholder="Your password" autocomplete="current-password" />
+          <button class="pw-toggle" type="button" onclick="togglePw()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+          </button>
+        </div>
+        <div class="form-hint" id="hint-l-password">Password is required.</div>
+      </div>
+
+      <div class="login-options">
+        <div class="remember-row">
+          <input type="checkbox" id="l-remember" />
+          <label for="l-remember">Remember me</label>
+        </div>
+        <a class="forgot-link" href="#">Forgot password?</a>
+      </div>
+
+      <button class="btn btn-primary" id="login-btn"
+              style="width:100%;padding:14px;font-size:15px;" onclick="handleLogin()">
+        <span class="btn-text">Sign In →</span>
+        <div class="spinner" style="width:17px;height:17px;border:2.5px solid rgba(255,255,255,0.3);
+             border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite;display:none;"></div>
+      </button>
+
+      <div class="auth-divider">or</div>
+
+      <a href="register.html" class="btn btn-secondary"
+         style="width:100%;padding:12px;font-size:14px;text-align:center;">
+        Create a new account
+      </a>
+
+      <div style="text-align:center;margin-top:20px;font-size:13px;color:var(--muted)">
+        <a href="index.html" style="color:var(--muted);text-decoration:none;">
+          ← Continue browsing without account
+        </a>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  const API_BASE = 'http://localhost:8090/api';
+
+  // Show welcome banner if coming from registration
+  if (localStorage.getItem('pendingEmail')) {
+    const banner = document.getElementById('welcome-banner');
+    banner.classList.add('show');
+    document.getElementById('l-email').value = localStorage.getItem('pendingEmail');
+    localStorage.removeItem('pendingEmail');
+  }
+
+  // If already logged in, redirect
+  if (localStorage.getItem('userId')) {
+    window.location.href = 'index.html';
+  }
+
+  function togglePw() {
+    const input = document.getElementById('l-password');
+    input.type = input.type === 'password' ? 'text' : 'password';
+  }
+
+  // Clear errors on input
+  ['l-email','l-password'].forEach(id => {
+    document.getElementById(id).addEventListener('input', function() {
+      this.classList.remove('is-error');
+      const hEl = document.getElementById('hint-' + id);
+      if (hEl) hEl.classList.remove('show');
+      document.getElementById('api-error').classList.remove('show');
+    });
+  });
+
+  // Also allow Enter key to submit
+  document.getElementById('l-password').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') handleLogin();
+  });
+
+  function validate() {
+    let ok = true;
+    const checks = [
+      { id: 'l-email',    hint: 'hint-l-email',    test: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) },
+      { id: 'l-password', hint: 'hint-l-password', test: v => v.length > 0 },
+    ];
+    checks.forEach(({ id, hint, test }) => {
+      const el = document.getElementById(id);
+      if (!test(el.value.trim())) {
+        el.classList.add('is-error');
+        document.getElementById(hint).classList.add('show');
+        ok = false;
+      }
+    });
+    return ok;
+  }
+
+  async function handleLogin() {
+    if (!validate()) return;
+
+    const btn     = document.getElementById('login-btn');
+    const errEl   = document.getElementById('api-error');
+    const btnText = btn.querySelector('.btn-text');
+    const spinner = btn.querySelector('.spinner');
+
+    errEl.classList.remove('show');
+    btnText.style.display = 'none';
+    spinner.style.display = 'block';
+    btn.disabled = true;
+
+    const email    = document.getElementById('l-email').value.trim();
+    const password = document.getElementById('l-password').value;
+
+    try {
+      const res = await fetch(`${API_BASE}/auth/login`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ email, password })
+      });
+
+      if (!res.ok) throw new Error('Invalid email or password.');
+
+      const user = await res.json();
+
+      if (!user || !user.id) throw new Error('Invalid credentials. Please try again.');
+
+      // Save user info to localStorage
+      localStorage.setItem('userId',   user.id);
+      localStorage.setItem('userName', user.name);
+      localStorage.setItem('userEmail', user.email);
+      localStorage.setItem('userRole',  user.role || 'STUDENT');
+
+      // Redirect: admin goes to admin page, student goes to courses
+      const redirect = localStorage.getItem('redirectAfterLogin') || 'index.html';
+      localStorage.removeItem('redirectAfterLogin');
+
+      if (user.role === 'ADMIN') {
+        window.location.href = 'admin.html';
+      } else {
+        window.location.href = redirect;
+      }
+
+    } catch (e) {
+      errEl.textContent = '⚠️ ' + (e.message || 'Could not connect to server. Make sure Spring Boot is running on port 8090.');
+      errEl.classList.add('show');
+      btnText.style.display = 'inline';
+      spinner.style.display = 'none';
+      btn.disabled = false;
+    }
+  }
+</script>
+</body>
+</html>

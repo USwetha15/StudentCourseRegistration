@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EduPortal — Enroll in a Course</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    /* ── ENROLLMENT PAGE SPECIFIC ── */
+    .enroll-page {
+      min-height: calc(100vh - 68px);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .enroll-wrapper {
+      flex: 1;
+      max-width: 1060px;
+      margin: 0 auto;
+      width: 100%;
+      padding: 56px 48px 80px;
+      display: grid;
+      grid-template-columns: 1fr 1.1fr;
+      gap: 64px;
+      align-items: start;
+    }
+
+    /* LEFT PANEL */
+    .enroll-left { padding-top: 4px; }
+
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 36px;
+    }
+    .breadcrumb a {
+      color: var(--muted);
+      text-decoration: none;
+      transition: color var(--transition);
+    }
+    .breadcrumb a:hover { color: var(--white); }
+    .breadcrumb-sep { opacity: 0.4; }
+
+    .enroll-step {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: var(--blue-bright);
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+
+    .enroll-heading {
+      font-family: var(--font-display);
+      font-size: clamp(28px, 4vw, 40px);
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -1px;
+      margin-bottom: 14px;
+    }
+
+    .enroll-subtext {
+      font-size: 15px;
+      color: var(--off-white);
+      font-weight: 300;
+      line-height: 1.7;
+      margin-bottom: 40px;
+    }
+
+    /* COURSE PREVIEW CARD */
+    .course-preview {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-lg);
+      padding: 24px 26px;
+      margin-bottom: 36px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .course-preview::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--blue), var(--teal));
+    }
+
+    .preview-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .preview-title {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 600;
+      letter-spacing: -0.3px;
+      margin-bottom: 18px;
+      color: var(--white);
+    }
+
+    .preview-row {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      font-size: 13px;
+      color: var(--off-white);
+      padding: 8px 0;
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .preview-row svg { color: var(--blue-bright); flex-shrink: 0; }
+
+    /* FEATURE LIST */
+    .feature-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .feature-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 13px;
+      color: var(--off-white);
+    }
+
+    .feature-check {
+      width: 20px; height: 20px;
+      background: rgba(0,201,167,0.15);
+      border: 1px solid rgba(0,201,167,0.3);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 10px;
+      color: var(--teal);
+    }
+
+    /* RIGHT PANEL — FORM */
+    .form-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-lg);
+      padding: 40px 36px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      animation: fadeUp 0.5s 0.15s ease both;
+    }
+
+    .form-card-title {
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 600;
+      letter-spacing: -0.3px;
+      margin-bottom: 6px;
+    }
+
+    .form-card-sub {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 30px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    /* COURSE SELECT DROPDOWN ARROW */
+    #f-course {
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7a99' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 36px;
+    }
+
+    #f-course option {
+      background: #162035;
+      color: #c8d3e8;
+      padding: 8px;
+    }
+
+    /* API ERROR */
+    .api-error {
+      display: none;
+      background: rgba(255,92,92,0.08);
+      border: 1px solid rgba(255,92,92,0.25);
+      border-radius: var(--radius-sm);
+      padding: 12px 16px;
+      font-size: 13px;
+      color: #ff8f8f;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+    .api-error.show { display: block; }
+
+    /* SUBMIT BUTTON STATES */
+    .btn-submit {
+      width: 100%;
+      padding: 15px;
+      margin-top: 8px;
+      font-size: 15px;
+    }
+
+    .btn-submit .spinner {
+      width: 17px; height: 17px;
+      border: 2.5px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: none;
+    }
+
+    .btn-submit.loading .btn-text { display: none; }
+    .btn-submit.loading .spinner  { display: inline-block; }
+    .btn-submit:disabled { opacity: 0.55; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+
+    /* SUCCESS STATE */
+    .success-state {
+      display: none;
+      text-align: center;
+      padding: 24px 0 8px;
+    }
+    .success-state.show { display: block; }
+
+    .success-ring {
+      width: 72px; height: 72px;
+      border-radius: 50%;
+      background: rgba(0,201,167,0.1);
+      border: 2px solid rgba(0,201,167,0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 22px;
+      animation: popIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
+    }
+
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.5); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
+    .success-ring svg { color: var(--teal); }
+
+    .success-title {
+      font-family: var(--font-display);
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 10px;
+    }
+
+    .success-msg {
+      font-size: 14px;
+      color: var(--off-white);
+      line-height: 1.65;
+      margin-bottom: 28px;
+      font-weight: 300;
+    }
+
+    .success-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    /* PROGRESS INDICATOR */
+    .progress-bar {
+      height: 3px;
+      background: var(--navy-light);
+      border-radius: 2px;
+      margin-bottom: 28px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 50%;
+      background: linear-gradient(90deg, var(--blue), var(--teal));
+      border-radius: 2px;
+      transition: width 0.5s ease;
+    }
+
+    @media (max-width: 820px) {
+      .enroll-wrapper { grid-template-columns: 1fr; padding: 32px 20px 60px; gap: 36px; }
+      .form-row { grid-template-columns: 1fr; }
+      .form-card { padding: 28px 22px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <a class="navbar-brand" href="index.html">
+      <div class="dot"></div>
+      EduPortal
+    </a>
+    <ul class="navbar-links">
+      <li><a href="index.html">Courses</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="contact.html">Contact</a></li>
+      <li><a href="admin.html">Admin</a></li>
+      <li id="nav-auth"></li>
+      <li><a href="index.html" class="btn-nav">← Back</a></li>
+    </ul>
+  </nav>
+
+  <div class="enroll-page">
+    <div class="enroll-wrapper">
+
+      <!-- LEFT: Info panel -->
+      <div class="enroll-left">
+        <div class="breadcrumb">
+          <a href="index.html">Courses</a>
+          <span class="breadcrumb-sep">›</span>
+          <span id="breadcrumb-course">Enrollment</span>
+        </div>
+
+        <div class="enroll-step">Step 1 of 1</div>
+        <h1 class="enroll-heading">Complete your<br>enrollment</h1>
+        <p class="enroll-subtext">
+          Fill in your details below and confirm your spot.
+          You'll receive a confirmation once enrolled.
+        </p>
+
+        <!-- Course preview card -->
+        <div class="course-preview">
+          <div class="preview-label">You're enrolling in</div>
+          <div class="preview-title" id="preview-title">Loading course…</div>
+
+          <div class="preview-row" id="preview-instructor-row" style="display:none">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+            <span id="preview-instructor">—</span>
+          </div>
+
+          <div class="preview-row" id="preview-duration-row" style="display:none">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12 6 12 12 16 14"/>
+            </svg>
+            <span id="preview-duration">—</span>
+          </div>
+        </div>
+
+        <!-- What you get -->
+        <div class="feature-list">
+          <div class="feature-item">
+            <div class="feature-check">✓</div>
+            Practical, project-based curriculum
+          </div>
+          <div class="feature-item">
+            <div class="feature-check">✓</div>
+            Certificate of completion
+          </div>
+          <div class="feature-item">
+            <div class="feature-check">✓</div>
+            Direct access to your instructor
+          </div>
+          <div class="feature-item">
+            <div class="feature-check">✓</div>
+            Lifetime access to course materials
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Form card -->
+      <div class="form-card">
+        <div class="progress-bar">
+          <div class="progress-fill" id="progress-fill"></div>
+        </div>
+
+        <div class="form-card-title">Your details</div>
+        <div class="form-card-sub">All fields marked required must be filled.</div>
+
+        <!-- FORM -->
+        <div id="enrollment-form">
+          <div class="api-error" id="api-error"></div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">First Name *</label>
+              <input class="form-input" type="text" id="f-firstname"
+                     placeholder="John" autocomplete="given-name" />
+              <div class="form-hint" id="hint-firstname">First name is required.</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Last Name *</label>
+              <input class="form-input" type="text" id="f-lastname"
+                     placeholder="Doe" autocomplete="family-name" />
+              <div class="form-hint" id="hint-lastname">Last name is required.</div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Email Address *</label>
+            <input class="form-input" type="email" id="f-email"
+                   placeholder="you@example.com" autocomplete="email" />
+            <div class="form-hint" id="hint-email">Enter a valid email address.</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Phone Number</label>
+            <input class="form-input" type="tel" id="f-phone"
+                   placeholder="+91 98765 43210" autocomplete="tel" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Select Course *</label>
+            <select class="form-input" id="f-course" onchange="onCourseChange(this)">
+              <option value="">— Choose a course —</option>
+            </select>
+            <input type="hidden" id="f-course-id" />
+            <div class="form-hint" id="hint-course">Please select a course.</div>
+          </div>
+
+          <button class="btn btn-primary btn-submit" id="submit-btn" onclick="handleEnroll()">
+            <span class="btn-text">Confirm Enrollment →</span>
+            <div class="spinner"></div>
+          </button>
+        </div>
+
+        <!-- SUCCESS STATE -->
+        <div class="success-state" id="success-state">
+          <div class="success-ring">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2.5"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+          </div>
+          <div class="success-title">You're enrolled! 🎉</div>
+          <p class="success-msg" id="success-msg">
+            Welcome aboard! Your enrollment has been confirmed.
+          </p>
+          <div class="success-actions">
+            <a class="btn btn-success" href="index.html">
+              Browse More Courses <span class="btn-icon">→</span>
+            </a>
+            <button class="btn btn-secondary" onclick="enrollAnother()">
+              Enroll in Another Course
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <span class="footer-brand">EduPortal</span>
+    <span>© 2025 All rights reserved · Powered by Spring Boot &amp; MySQL</span>
+  </footer>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast">
+    <span class="toast-icon">✓</span>
+    <span id="toast-msg">Done!</span>
+  </div>
+
+  <script>
+    const API_BASE = 'http://localhost:8090/api';
+
+    // ── Nav auth state ──
+    (function() {
+      const navAuth = document.getElementById('nav-auth');
+      if (!navAuth) return;
+      const name = localStorage.getItem('userName');
+      if (name) {
+        navAuth.innerHTML = `<a href="#" onclick="logout()" style="color:var(--muted);font-size:14px;font-weight:500;text-decoration:none;">Hi, ${name.split(' ')[0]} · Logout</a>`;
+      } else {
+        navAuth.innerHTML = `<a href="login.html" style="color:var(--blue-bright);font-size:14px;font-weight:500;text-decoration:none;">Login</a>`;
+      }
+    })();
+
+    function logout() {
+      localStorage.removeItem('userId');
+      localStorage.removeItem('userName');
+      localStorage.removeItem('userEmail');
+      localStorage.removeItem('userRole');
+      window.location.href = 'login.html';
+    }
+
+    // ── Pre-fill from logged-in user ──
+    const loggedName  = localStorage.getItem('userName')  || '';
+    const loggedEmail = localStorage.getItem('userEmail') || '';
+    if (loggedName) {
+      const parts = loggedName.trim().split(' ');
+      document.getElementById('f-firstname').value = parts[0] || '';
+      document.getElementById('f-lastname').value  = parts.slice(1).join(' ') || '';
+    }
+    if (loggedEmail) document.getElementById('f-email').value = loggedEmail;
+
+    // ── If not logged in, redirect to login first ──
+    if (!localStorage.getItem('userId')) {
+      localStorage.setItem('redirectAfterLogin', window.location.href);
+      window.location.href = 'login.html';
+    }
+
+    // ── Read URL params ──
+    const params      = new URLSearchParams(window.location.search);
+    const courseId    = params.get('courseId');
+    const courseTitle = params.get('courseTitle') ? decodeURIComponent(params.get('courseTitle')) : 'Course';
+
+    // ── Load courses into dropdown ──
+    const FALLBACK_COURSES = [
+      { id: 1, title: 'Java Full Stack', instructor: 'Swetha', duration: '3 Months' },
+      { id: 2, title: 'Python Basics',   instructor: 'Arun',   duration: '1 Month'  },
+      { id: 3, title: 'Web Design',      instructor: 'Golda',  duration: '2 Months' },
+    ];
+
+    async function loadCourseDropdown() {
+      let courses = FALLBACK_COURSES;
+      try {
+        const res = await fetch(`${API_BASE}/courses`);
+        if (res.ok) courses = await res.json();
+      } catch(e) {}
+
+      const sel = document.getElementById('f-course');
+      sel.innerHTML = '<option value="">— Choose a course —</option>';
+      courses.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value       = c.id;
+        opt.textContent = c.title;
+        opt.dataset.instructor = c.instructor || '';
+        opt.dataset.duration   = c.duration   || '';
+        // Pre-select if passed via URL
+        if (String(c.id) === String(courseId)) opt.selected = true;
+        sel.appendChild(opt);
+      });
+
+      // If courseId was passed via URL, trigger update
+      if (courseId) {
+        document.getElementById('f-course-id').value = courseId;
+        updatePreview(courseId, courseTitle);
+        // Fetch details
+        try {
+          const r = await fetch(`${API_BASE}/courses/${courseId}`);
+          if (r.ok) {
+            const c = await r.json();
+            updatePreview(c.id, c.title, c.instructor, c.duration);
+          }
+        } catch(e) {}
+      }
+    }
+    loadCourseDropdown();
+
+    function onCourseChange(sel) {
+      const opt = sel.options[sel.selectedIndex];
+      const id  = opt.value;
+      const title = opt.textContent;
+      document.getElementById('f-course-id').value = id;
+      document.getElementById('hint-course').classList.remove('show');
+      sel.classList.remove('is-error');
+      updatePreview(id, id ? title : 'Course', opt.dataset.instructor, opt.dataset.duration);
+      updateProgress();
+    }
+
+    function updatePreview(id, title, instructor, duration) {
+      document.getElementById('preview-title').textContent     = title || 'Course';
+      document.getElementById('breadcrumb-course').textContent = title || 'Enrollment';
+      if (instructor) {
+        document.getElementById('preview-instructor').textContent       = instructor;
+        document.getElementById('preview-instructor-row').style.display = 'flex';
+      } else {
+        document.getElementById('preview-instructor-row').style.display = 'none';
+      }
+      if (duration) {
+        document.getElementById('preview-duration').textContent       = duration;
+        document.getElementById('preview-duration-row').style.display = 'flex';
+      } else {
+        document.getElementById('preview-duration-row').style.display = 'none';
+      }
+    }
+
+    // ── Progress bar on input ──
+    const fields = ['f-firstname','f-lastname','f-email','f-phone'];
+    fields.forEach(id => {
+      document.getElementById(id).addEventListener('input', updateProgress);
+    });
+
+    function updateProgress() {
+      const filled = fields.filter(id => document.getElementById(id).value.trim()).length;
+      const pct    = 10 + (filled / fields.length) * 75;
+      document.getElementById('progress-fill').style.width = pct + '%';
+    }
+    updateProgress();
+
+    // ── Validation ──
+    function validate() {
+      let ok = true;
+
+      // Course dropdown check
+      const cSel = document.getElementById('f-course');
+      const cHint = document.getElementById('hint-course');
+      if (!cSel.value) {
+        cSel.classList.add('is-error');
+        cHint.classList.add('show');
+        ok = false;
+      } else {
+        cSel.classList.remove('is-error');
+        cHint.classList.remove('show');
+      }
+
+      const checks = [
+        { id: 'f-firstname', hint: 'hint-firstname', test: v => v.length > 0 },
+        { id: 'f-lastname',  hint: 'hint-lastname',  test: v => v.length > 0 },
+        { id: 'f-email',     hint: 'hint-email',     test: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) },
+      ];
+      checks.forEach(({ id, hint, test }) => {
+        const el  = document.getElementById(id);
+        const val = el.value.trim();
+        const hEl = document.getElementById(hint);
+        if (!test(val)) {
+          el.classList.add('is-error');
+          hEl.classList.add('show');
+          ok = false;
+        } else {
+          el.classList.remove('is-error');
+          hEl.classList.remove('show');
+        }
+      });
+      return ok;
+    }
+
+    // ── Remove error on type ──
+    ['f-firstname','f-lastname','f-email'].forEach(id => {
+      document.getElementById(id).addEventListener('input', function() {
+        this.classList.remove('is-error');
+        const h = id.replace('f-','hint-');
+        const hEl = document.getElementById(h);
+        if (hEl) hEl.classList.remove('show');
+      });
+    });
+
+    // ── Toast ──
+    function showToast(msg, icon) {
+      const t = document.getElementById('toast');
+      document.getElementById('toast-msg').textContent = msg;
+      t.querySelector('.toast-icon').textContent = icon || '✓';
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 4000);
+    }
+
+    // ── Enroll handler ──
+    async function handleEnroll() {
+      if (!validate()) return;
+
+      const btn    = document.getElementById('submit-btn');
+      const errEl  = document.getElementById('api-error');
+      errEl.classList.remove('show');
+      btn.classList.add('loading');
+      btn.disabled = true;
+
+      document.getElementById('progress-fill').style.width = '90%';
+
+      const firstName = document.getElementById('f-firstname').value.trim();
+      const lastName  = document.getElementById('f-lastname').value.trim();
+      const email     = document.getElementById('f-email').value.trim();
+      const cId       = parseInt(document.getElementById('f-course-id').value) || 1;
+
+      // Use logged-in user's ID from localStorage
+      const userId = parseInt(localStorage.getItem('userId') || '1');
+
+      const payload = {
+        user:   { id: userId },
+        course: { id: cId }
+      };
+
+      try {
+        const res = await fetch(`${API_BASE}/enrollment`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          const msg = await res.text();
+          throw new Error(msg || 'Server returned ' + res.status);
+        }
+
+        // SUCCESS
+        document.getElementById('progress-fill').style.width = '100%';
+        document.getElementById('enrollment-form').style.display = 'none';
+        document.getElementById('success-state').classList.add('show');
+        document.getElementById('success-msg').textContent =
+          `Hi ${firstName}! You've successfully enrolled in "${courseTitle}". A confirmation has been sent to ${email}.`;
+        showToast('Enrollment confirmed!', '🎉');
+
+      } catch (e) {
+        errEl.textContent = '⚠️ Enrollment failed: ' + (e.message || 'Could not reach the server. Make sure Spring Boot is running on port 8090.');
+        errEl.classList.add('show');
+        btn.classList.remove('loading');
+        btn.disabled = false;
+        document.getElementById('progress-fill').style.width = '50%';
+      }
+    }
+
+    function enrollAnother() {
+      window.location.href = 'index.html';
+    }
+  </script>
+</body>
+</html>

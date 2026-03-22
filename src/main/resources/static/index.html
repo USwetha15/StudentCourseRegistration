@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EduPortal — Available Courses</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <a class="navbar-brand" href="index.html">
+      <div class="dot"></div>
+      EduPortal
+    </a>
+    <ul class="navbar-links">
+      <li><a href="index.html" class="active">Courses</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="contact.html">Contact</a></li>
+      <li><a href="enrollment.html" class="btn-nav">Enroll Now</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-badge">Spring 2025 Intake Open</div>
+    <h1 class="hero-title">
+      Build skills that<br>
+      <span class="highlight">launch careers.</span>
+    </h1>
+    <p class="hero-subtitle">
+      Industry-ready courses taught by experienced instructors.
+      Learn by building real-world projects from day one.
+    </p>
+    <div class="hero-stats">
+      <div class="stat-item">
+        <div class="stat-num" id="stat-courses">—</div>
+        <div class="stat-label">Courses</div>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <div class="stat-num">100%</div>
+        <div class="stat-label">Hands-on</div>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <div class="stat-num">3+</div>
+        <div class="stat-label">Instructors</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- COURSES -->
+  <section class="section">
+    <div class="section-header">
+      <h2 class="section-title">Available Courses</h2>
+      <span class="section-count" id="result-count">Loading…</span>
+    </div>
+
+    <div class="error-banner" id="error-banner">
+      ⚠️ Could not connect to <strong>localhost:8090</strong>. Showing sample courses.
+      Start your Spring Boot app and refresh to load live data.
+    </div>
+
+    <div class="loader" id="loader">
+      <div class="loader-ring"></div>
+      Fetching courses from server…
+    </div>
+
+    <div class="course-grid" id="course-grid"></div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <span class="footer-brand">EduPortal</span>
+    <span>© 2025 All rights reserved · Powered by Spring Boot &amp; MySQL</span>
+  </footer>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast">
+    <span class="toast-icon">✓</span>
+    <span id="toast-msg">Done!</span>
+  </div>
+
+  <script>
+    const API_BASE = 'http://localhost:8090/api';
+    const ICONS    = ['💻', '🐍', '🎨', '📱', '☁️', '🔧', '📊', '🤖'];
+
+    const FALLBACK = [
+      { id: 1, title: 'Java Full Stack', instructor: 'Swetha', duration: '3 Months',
+        description: 'Master Java with Spring Boot on the backend and React on the frontend. Build and deploy production-ready REST APIs.' },
+      { id: 2, title: 'Python Basics',   instructor: 'Arun', duration: '1 Month',
+        description: 'Introduction to Python programming — variables, loops, functions, OOP, and real mini-projects from week one.' },
+      { id: 3, title: 'Web Design',      instructor: 'Golda', duration: '2 Months',
+        description: 'Learn HTML, CSS, and JavaScript from scratch. Build responsive, accessible, beautiful websites and UIs.' },
+    ];
+
+    function buildCard(course, index) {
+      const icon = ICONS[index % ICONS.length];
+      const card = document.createElement('div');
+      card.className = 'course-card';
+      card.style.animationDelay = (index * 0.1) + 's';
+      card.innerHTML = `
+        <div class="card-header">
+          <div class="card-icon">${icon}</div>
+          <span class="card-id">Course ${String(course.id).padStart(2,'0')}</span>
+        </div>
+        <div class="card-title">${course.title || 'Untitled'}</div>
+        <div class="card-desc">${course.description || 'No description provided.'}</div>
+        <div class="card-meta">
+          <div class="meta-item">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+            </svg>
+            <span>${course.duration || '—'}</span>
+          </div>
+          <div class="meta-item">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+            <span>${course.instructor || '—'}</span>
+          </div>
+        </div>
+        <button class="btn btn-primary"
+          onclick="goEnroll(${course.id}, '${encodeURIComponent(course.title)}')">
+          Enroll Now <span class="btn-icon">→</span>
+        </button>
+      `;
+      return card;
+    }
+
+    function renderCourses(courses) {
+      const grid = document.getElementById('course-grid');
+      grid.innerHTML = '';
+      courses.forEach((c, i) => grid.appendChild(buildCard(c, i)));
+      document.getElementById('stat-courses').textContent = courses.length;
+      document.getElementById('result-count').textContent =
+        courses.length + ' course' + (courses.length !== 1 ? 's' : '') + ' available';
+    }
+
+    function goEnroll(id, title) {
+      window.location.href = `enrollment.html?courseId=${id}&courseTitle=${title}`;
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      document.getElementById('toast-msg').textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3500);
+    }
+
+    async function loadCourses() {
+      try {
+        const res = await fetch(`${API_BASE}/courses`);
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        document.getElementById('loader').style.display = 'none';
+        renderCourses(data);
+        showToast('Courses loaded from server ✓');
+      } catch(e) {
+        document.getElementById('loader').style.display = 'none';
+        document.getElementById('error-banner').classList.add('show');
+        renderCourses(FALLBACK);
+      }
+    }
+
+    loadCourses();
+  </script>
+</body>
+</html>

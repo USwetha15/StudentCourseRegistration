@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EduPortal — Admin Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    /* ── ADMIN PAGE SPECIFIC ── */
+    .admin-layout {
+      display: flex;
+      min-height: calc(100vh - 68px);
+    }
+
+    /* SIDEBAR */
+    .sidebar {
+      width: 240px;
+      background: rgba(255,255,255,0.02);
+      border-right: 1px solid var(--card-border);
+      padding: 32px 0;
+      flex-shrink: 0;
+      position: sticky;
+      top: 68px;
+      height: calc(100vh - 68px);
+      overflow-y: auto;
+    }
+
+    .sidebar-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: var(--muted);
+      text-transform: uppercase;
+      padding: 0 24px;
+      margin-bottom: 10px;
+    }
+
+    .sidebar-nav { list-style: none; margin-bottom: 32px; }
+
+    .sidebar-nav li a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 24px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color var(--transition), background var(--transition);
+      border-left: 2px solid transparent;
+    }
+
+    .sidebar-nav li a:hover {
+      color: var(--white);
+      background: rgba(255,255,255,0.04);
+    }
+
+    .sidebar-nav li a.active {
+      color: var(--blue-bright);
+      background: rgba(47,128,237,0.08);
+      border-left-color: var(--blue);
+    }
+
+    .sidebar-icon { font-size: 16px; }
+
+    /* MAIN CONTENT */
+    .admin-main {
+      flex: 1;
+      padding: 40px 44px 60px;
+      overflow-x: hidden;
+    }
+
+    .admin-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 36px;
+    }
+
+    .admin-title {
+      font-family: var(--font-display);
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .admin-subtitle {
+      font-size: 14px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* STAT CARDS */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+      margin-bottom: 36px;
+    }
+
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-md);
+      padding: 22px 24px;
+      animation: fadeUp 0.4s ease both;
+    }
+
+    .stat-card:nth-child(2) { animation-delay: 0.05s; }
+    .stat-card:nth-child(3) { animation-delay: 0.10s; }
+    .stat-card:nth-child(4) { animation-delay: 0.15s; }
+
+    .stat-card-label {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 500;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .stat-card-value {
+      font-family: var(--font-display);
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--white);
+      line-height: 1;
+    }
+
+    .stat-card-sub {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    .stat-card.blue  .stat-card-value { color: var(--blue-bright); }
+    .stat-card.teal  .stat-card-value { color: var(--teal); }
+    .stat-card.coral .stat-card-value { color: #ed7b4f; }
+
+    /* TABLE SECTION */
+    .table-section {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      animation: fadeUp 0.5s 0.2s ease both;
+    }
+
+    .table-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--card-border);
+      flex-wrap: wrap;
+    }
+
+    .table-title {
+      font-family: var(--font-display);
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .toolbar-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* SEARCH */
+    .search-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-sm);
+      padding: 8px 14px;
+      transition: border-color var(--transition);
+    }
+
+    .search-box:focus-within {
+      border-color: var(--blue);
+    }
+
+    .search-box svg { color: var(--muted); flex-shrink: 0; }
+
+    .search-box input {
+      background: transparent;
+      border: none;
+      outline: none;
+      font-family: var(--font-body);
+      font-size: 13px;
+      color: var(--white);
+      width: 180px;
+    }
+
+    .search-box input::placeholder { color: var(--muted); }
+
+    /* FILTER */
+    .filter-select {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-sm);
+      padding: 8px 32px 8px 12px;
+      font-family: var(--font-body);
+      font-size: 13px;
+      color: var(--white);
+      outline: none;
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7a99' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      transition: border-color var(--transition);
+    }
+
+    .filter-select:focus { border-color: var(--blue); }
+    .filter-select option { background: #162035; }
+
+    /* REFRESH BTN */
+    .refresh-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-sm);
+      padding: 8px 14px;
+      font-family: var(--font-body);
+      font-size: 13px;
+      color: var(--off-white);
+      cursor: pointer;
+      transition: border-color var(--transition), color var(--transition);
+    }
+
+    .refresh-btn:hover { border-color: rgba(47,128,237,0.4); color: var(--white); }
+    .refresh-btn.spinning svg { animation: spin 0.6s linear infinite; }
+
+    /* TABLE */
+    .table-wrap { overflow-x: auto; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    thead tr {
+      background: rgba(255,255,255,0.03);
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    th {
+      padding: 13px 20px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--muted);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      white-space: nowrap;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    th:hover { color: var(--off-white); }
+
+    th .sort-icon {
+      display: inline-block;
+      margin-left: 4px;
+      opacity: 0.4;
+      font-size: 10px;
+    }
+
+    th.sorted .sort-icon { opacity: 1; color: var(--blue-bright); }
+
+    tbody tr {
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      transition: background var(--transition);
+    }
+
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: rgba(255,255,255,0.03); }
+
+    td {
+      padding: 16px 20px;
+      color: var(--off-white);
+      vertical-align: middle;
+    }
+
+    /* STUDENT CELL */
+    .student-cell {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .student-avatar {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      background: rgba(47,128,237,0.15);
+      border: 1px solid rgba(47,128,237,0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--blue-bright);
+      flex-shrink: 0;
+    }
+
+    .student-name {
+      font-weight: 500;
+      color: var(--white);
+      font-size: 14px;
+    }
+
+    .student-id {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    /* COURSE BADGE */
+    .course-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .badge-java   { background: rgba(47,128,237,0.12); color: var(--blue-bright); border: 1px solid rgba(47,128,237,0.2); }
+    .badge-python { background: rgba(0,201,167,0.12);  color: var(--teal);        border: 1px solid rgba(0,201,167,0.2); }
+    .badge-web    { background: rgba(237,123,79,0.12); color: #ed9b6f;            border: 1px solid rgba(237,123,79,0.2); }
+    .badge-other  { background: rgba(255,255,255,0.06); color: var(--off-white);  border: 1px solid var(--card-border); }
+
+    /* STATUS BADGE */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      background: rgba(0,201,167,0.1);
+      color: var(--teal);
+      border: 1px solid rgba(0,201,167,0.2);
+    }
+
+    .status-badge::before {
+      content: '';
+      width: 5px; height: 5px;
+      background: var(--teal);
+      border-radius: 50%;
+    }
+
+    /* EMPTY / LOADER STATE */
+    .table-empty {
+      text-align: center;
+      padding: 64px 24px;
+      color: var(--muted);
+    }
+
+    .table-empty .empty-icon { font-size: 40px; margin-bottom: 14px; }
+    .table-empty .empty-title { font-family: var(--font-display); font-size: 18px; font-weight: 600; color: var(--off-white); margin-bottom: 8px; }
+    .table-empty .empty-sub { font-size: 14px; font-weight: 300; }
+
+    .table-loader {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 64px 24px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    /* PAGINATION */
+    .table-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 24px;
+      border-top: 1px solid var(--card-border);
+      font-size: 13px;
+      color: var(--muted);
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .pagination {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .page-btn {
+      width: 32px; height: 32px;
+      border-radius: 6px;
+      background: transparent;
+      border: 1px solid var(--card-border);
+      color: var(--muted);
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all var(--transition);
+      font-family: var(--font-body);
+    }
+
+    .page-btn:hover:not(:disabled) { border-color: var(--blue); color: var(--white); }
+    .page-btn.active { background: var(--blue); border-color: var(--blue); color: var(--white); }
+    .page-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    /* ERROR BANNER */
+    .api-error {
+      display: none;
+      background: rgba(255,92,92,0.08);
+      border: 1px solid rgba(255,92,92,0.25);
+      border-radius: var(--radius-sm);
+      padding: 12px 16px;
+      font-size: 13px;
+      color: #ff8f8f;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+    .api-error.show { display: block; }
+
+    @media (max-width: 900px) {
+      .sidebar { display: none; }
+      .admin-main { padding: 28px 20px 48px; }
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+      .table-toolbar { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <a class="navbar-brand" href="index.html">
+      <div class="dot"></div>
+      EduPortal
+    </a>
+    <ul class="navbar-links">
+      <li><a href="index.html">Courses</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="contact.html">Contact</a></li>
+      <li><a href="admin.html" class="active" style="color:var(--blue-bright)">Admin</a></li>
+    </ul>
+  </nav>
+
+  <div class="admin-layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-label">Main</div>
+      <ul class="sidebar-nav">
+        <li><a href="#" class="active"><span class="sidebar-icon">👥</span> Enrolled Students</a></li>
+        <li><a href="index.html"><span class="sidebar-icon">📚</span> Courses</a></li>
+      </ul>
+      <div class="sidebar-label">Quick Links</div>
+      <ul class="sidebar-nav">
+        <li><a href="enrollment.html"><span class="sidebar-icon">➕</span> New Enrollment</a></li>
+        <li><a href="contact.html"><span class="sidebar-icon">📧</span> Contact</a></li>
+        <li><a href="about.html"><span class="sidebar-icon">ℹ️</span> About</a></li>
+      </ul>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="admin-main">
+
+      <div class="admin-header">
+        <div>
+          <div class="admin-title">Enrolled Students</div>
+          <div class="admin-subtitle">All students registered via the portal</div>
+        </div>
+        <div class="header-actions">
+          <a href="enrollment.html" class="btn btn-primary" style="padding:10px 20px;font-size:13px;">
+            + New Enrollment
+          </a>
+        </div>
+      </div>
+
+      <!-- ERROR BANNER -->
+      <div class="api-error" id="api-error">
+        ⚠️ Could not connect to <strong>localhost:8090</strong>. Make sure your Spring Boot app is running.
+      </div>
+
+      <!-- STAT CARDS -->
+      <div class="stats-row">
+        <div class="stat-card blue">
+          <div class="stat-card-label">👥 Total Enrollments</div>
+          <div class="stat-card-value" id="stat-total">—</div>
+          <div class="stat-card-sub">All courses combined</div>
+        </div>
+        <div class="stat-card teal">
+          <div class="stat-card-label">💻 Java Full Stack</div>
+          <div class="stat-card-value" id="stat-java">—</div>
+          <div class="stat-card-sub">Students enrolled</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">🐍 Python Basics</div>
+          <div class="stat-card-value" id="stat-python">—</div>
+          <div class="stat-card-sub">Students enrolled</div>
+        </div>
+        <div class="stat-card coral">
+          <div class="stat-card-label">🎨 Web Design</div>
+          <div class="stat-card-value" id="stat-web">—</div>
+          <div class="stat-card-sub">Students enrolled</div>
+        </div>
+      </div>
+
+      <!-- TABLE -->
+      <div class="table-section">
+        <div class="table-toolbar">
+          <div class="table-title">All Enrollments</div>
+          <div class="toolbar-right">
+            <!-- Search -->
+            <div class="search-box">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+              <input type="text" id="search-input" placeholder="Search student or email…"
+                     oninput="applyFilters()" />
+            </div>
+            <!-- Filter by course -->
+            <select class="filter-select" id="course-filter" onchange="applyFilters()">
+              <option value="">All Courses</option>
+              <option value="Java Full Stack">Java Full Stack</option>
+              <option value="Python Basics">Python Basics</option>
+              <option value="Web Design">Web Design</option>
+            </select>
+            <!-- Refresh -->
+            <button class="refresh-btn" id="refresh-btn" onclick="loadData()">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="23 4 23 10 17 10"/>
+                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+              </svg>
+              Refresh
+            </button>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <!-- LOADER -->
+          <div class="table-loader" id="table-loader">
+            <div class="loader-ring"></div>
+            Loading enrollments…
+          </div>
+
+          <!-- TABLE -->
+          <table id="data-table" style="display:none">
+            <thead>
+              <tr>
+                <th onclick="sortBy('name')">Student <span class="sort-icon">↕</span></th>
+                <th onclick="sortBy('email')">Email <span class="sort-icon">↕</span></th>
+                <th onclick="sortBy('course')">Course <span class="sort-icon">↕</span></th>
+                <th onclick="sortBy('date')">Enrolled Date <span class="sort-icon">↕</span></th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="table-body"></tbody>
+          </table>
+
+          <!-- EMPTY STATE -->
+          <div class="table-empty" id="table-empty" style="display:none">
+            <div class="empty-icon">📭</div>
+            <div class="empty-title">No enrollments found</div>
+            <div class="empty-sub" id="empty-sub-text">No students have enrolled yet.</div>
+          </div>
+        </div>
+
+        <div class="table-footer">
+          <span id="table-info">—</span>
+          <div class="pagination" id="pagination"></div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <span class="footer-brand">EduPortal Admin</span>
+    <span>© 2025 All rights reserved · Powered by Spring Boot &amp; MySQL</span>
+  </footer>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast">
+    <span class="toast-icon">✓</span>
+    <span id="toast-msg">Done!</span>
+  </div>
+
+  <script>
+    const API_BASE = 'http://localhost:8090/api';
+
+    let allData      = [];   // raw from API
+    let filtered     = [];   // after search/filter
+    let sortField    = 'date';
+    let sortAsc      = false;
+    let currentPage  = 1;
+    const PAGE_SIZE  = 10;
+
+    // ── BADGE helper ──
+    function courseBadge(title) {
+      if (!title) return `<span class="course-badge badge-other">—</span>`;
+      const t = title.toLowerCase();
+      if (t.includes('java'))   return `<span class="course-badge badge-java">💻 ${title}</span>`;
+      if (t.includes('python')) return `<span class="course-badge badge-python">🐍 ${title}</span>`;
+      if (t.includes('web'))    return `<span class="course-badge badge-web">🎨 ${title}</span>`;
+      return `<span class="course-badge badge-other">${title}</span>`;
+    }
+
+    // ── Initials avatar ──
+    function initials(name) {
+      if (!name) return '?';
+      const parts = name.trim().split(' ');
+      return parts.length >= 2
+        ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+        : parts[0][0].toUpperCase();
+    }
+
+    // ── Format date ──
+    function formatDate(d) {
+      if (!d) return '—';
+      try {
+        return new Date(d).toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' });
+      } catch { return d; }
+    }
+
+    // ── Render table ──
+    function renderTable() {
+      const start   = (currentPage - 1) * PAGE_SIZE;
+      const page    = filtered.slice(start, start + PAGE_SIZE);
+      const tbody   = document.getElementById('table-body');
+      const table   = document.getElementById('data-table');
+      const empty   = document.getElementById('table-empty');
+      const info    = document.getElementById('table-info');
+
+      if (filtered.length === 0) {
+        table.style.display  = 'none';
+        empty.style.display  = 'block';
+        const q = document.getElementById('search-input').value.trim();
+        const f = document.getElementById('course-filter').value;
+        document.getElementById('empty-sub-text').textContent =
+          (q || f) ? 'No results match your search.' : 'No students have enrolled yet.';
+        info.textContent = '0 results';
+        document.getElementById('pagination').innerHTML = '';
+        return;
+      }
+
+      table.style.display = 'table';
+      empty.style.display = 'none';
+
+      tbody.innerHTML = page.map((row, i) => `
+        <tr>
+          <td>
+            <div class="student-cell">
+              <div class="student-avatar">${initials(row.name)}</div>
+              <div>
+                <div class="student-name">${row.name || '—'}</div>
+                <div class="student-id">#${row.enrollmentId || (start + i + 1)}</div>
+              </div>
+            </div>
+          </td>
+          <td>${row.email || '—'}</td>
+          <td>${courseBadge(row.course)}</td>
+          <td>${formatDate(row.date)}</td>
+          <td><span class="status-badge">Active</span></td>
+        </tr>
+      `).join('');
+
+      const total = filtered.length;
+      const end   = Math.min(start + PAGE_SIZE, total);
+      info.textContent = `Showing ${start + 1}–${end} of ${total} enrollment${total !== 1 ? 's' : ''}`;
+
+      renderPagination(total);
+    }
+
+    // ── Pagination ──
+    function renderPagination(total) {
+      const pages = Math.ceil(total / PAGE_SIZE);
+      const el    = document.getElementById('pagination');
+      if (pages <= 1) { el.innerHTML = ''; return; }
+
+      let html = `<button class="page-btn" onclick="goPage(${currentPage-1})" ${currentPage===1?'disabled':''}>‹</button>`;
+      for (let p = 1; p <= pages; p++) {
+        html += `<button class="page-btn ${p===currentPage?'active':''}" onclick="goPage(${p})">${p}</button>`;
+      }
+      html += `<button class="page-btn" onclick="goPage(${currentPage+1})" ${currentPage===pages?'disabled':''}>›</button>`;
+      el.innerHTML = html;
+    }
+
+    function goPage(p) {
+      const pages = Math.ceil(filtered.length / PAGE_SIZE);
+      if (p < 1 || p > pages) return;
+      currentPage = p;
+      renderTable();
+    }
+
+    // ── Sort ──
+    function sortBy(field) {
+      if (sortField === field) sortAsc = !sortAsc;
+      else { sortField = field; sortAsc = true; }
+
+      document.querySelectorAll('th .sort-icon').forEach(el => {
+        el.textContent = '↕'; el.closest('th').classList.remove('sorted');
+      });
+      event.currentTarget.classList.add('sorted');
+      event.currentTarget.querySelector('.sort-icon').textContent = sortAsc ? '↑' : '↓';
+
+      filtered.sort((a, b) => {
+        let va = a[field] || '', vb = b[field] || '';
+        if (field === 'date') { va = new Date(va); vb = new Date(vb); }
+        return sortAsc ? (va > vb ? 1 : -1) : (va < vb ? 1 : -1);
+      });
+      currentPage = 1;
+      renderTable();
+    }
+
+    // ── Filter ──
+    function applyFilters() {
+      const q = document.getElementById('search-input').value.toLowerCase().trim();
+      const f = document.getElementById('course-filter').value.toLowerCase();
+      filtered = allData.filter(row => {
+        const matchQ = !q || (row.name||'').toLowerCase().includes(q) || (row.email||'').toLowerCase().includes(q);
+        const matchF = !f || (row.course||'').toLowerCase().includes(f);
+        return matchQ && matchF;
+      });
+      currentPage = 1;
+      renderTable();
+    }
+
+    // ── Update stats ──
+    function updateStats(data) {
+      document.getElementById('stat-total').textContent  = data.length;
+      document.getElementById('stat-java').textContent   = data.filter(r => (r.course||'').toLowerCase().includes('java')).length;
+      document.getElementById('stat-python').textContent = data.filter(r => (r.course||'').toLowerCase().includes('python')).length;
+      document.getElementById('stat-web').textContent    = data.filter(r => (r.course||'').toLowerCase().includes('web')).length;
+    }
+
+    // ── Toast ──
+    function showToast(msg, icon) {
+      const t = document.getElementById('toast');
+      document.getElementById('toast-msg').textContent = msg;
+      t.querySelector('.toast-icon').textContent = icon || '✓';
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3500);
+    }
+
+    // ── Load data ──
+    async function loadData() {
+      const loader   = document.getElementById('table-loader');
+      const errBanner = document.getElementById('api-error');
+      const refreshBtn = document.getElementById('refresh-btn');
+
+      loader.style.display = 'flex';
+      document.getElementById('data-table').style.display = 'none';
+      document.getElementById('table-empty').style.display = 'none';
+      errBanner.classList.remove('show');
+      refreshBtn.classList.add('spinning');
+
+      try {
+        // Fetch enrollments + all users to get name & email
+        const [enrollRes, userRes] = await Promise.all([
+          fetch(`${API_BASE}/enrollment`),
+          fetch(`${API_BASE}/auth/users`).catch(() => ({ ok: false }))
+        ]);
+
+        if (!enrollRes.ok) throw new Error('HTTP ' + enrollRes.status);
+        const enrollments = await enrollRes.json();
+
+        // Build a user map if users endpoint exists
+        let userMap = {};
+        if (userRes.ok) {
+          const users = await userRes.json();
+          users.forEach(u => { userMap[u.id] = u; });
+        }
+
+        // Flatten enrollment data
+        allData = enrollments.map(e => ({
+          enrollmentId: e.id,
+          name:   e.user?.name  || userMap[e.user?.id]?.name  || `Student #${e.user?.id || '?'}`,
+          email:  e.user?.email || userMap[e.user?.id]?.email || '—',
+          course: e.course?.title || '—',
+          date:   e.enrolledDate || null,
+        }));
+
+        // Default sort by date desc
+        allData.sort((a, b) => new Date(b.date) - new Date(a.date));
+        filtered = [...allData];
+
+        updateStats(allData);
+        loader.style.display = 'none';
+        renderTable();
+        showToast(`${allData.length} enrollment${allData.length !== 1 ? 's' : ''} loaded`, '✓');
+
+      } catch (e) {
+        loader.style.display = 'none';
+        errBanner.classList.add('show');
+
+        // Show demo data so UI is not empty
+        allData = [
+          { enrollmentId: 1, name: 'Ravi Kumar',   email: 'ravi@example.com',  course: 'Java Full Stack', date: '2025-03-10' },
+          { enrollmentId: 2, name: 'Ananya Singh',  email: 'ananya@example.com', course: 'Python Basics',   date: '2025-03-12' },
+          { enrollmentId: 3, name: 'Priya Nair',    email: 'priya@example.com',  course: 'Web Design',      date: '2025-03-14' },
+          { enrollmentId: 4, name: 'Karan Mehta',   email: 'karan@example.com',  course: 'Java Full Stack', date: '2025-03-15' },
+          { enrollmentId: 5, name: 'Deepika Raj',   email: 'deepika@example.com', course: 'Python Basics',  date: '2025-03-16' },
+        ];
+        filtered = [...allData];
+        updateStats(allData);
+        renderTable();
+      } finally {
+        refreshBtn.classList.remove('spinning');
+      }
+    }
+
+    // ── Init ──
+    loadData();
+  </script>
+</body>
+</html>
