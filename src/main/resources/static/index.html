@@ -18,6 +18,8 @@
       <li><a href="index.html" class="active">Courses</a></li>
       <li><a href="about.html">About</a></li>
       <li><a href="contact.html">Contact</a></li>
+      <li><a href="admin.html">Admin</a></li>
+      <li id="nav-auth"></li>
       <li><a href="enrollment.html" class="btn-nav">Enroll Now</a></li>
     </ul>
   </nav>
@@ -84,7 +86,7 @@
   </div>
 
   <script>
-    const API_BASE = 'http://localhost:8090/api';
+    const API_BASE = 'https://studentcourseregistration-production.up.railway.app/api';
     const ICONS    = ['💻', '🐍', '🎨', '📱', '☁️', '🔧', '📊', '🤖'];
 
     const FALLBACK = [
@@ -169,6 +171,26 @@
     }
 
     loadCourses();
+
+    // ── Nav auth state ──
+    (function() {
+      const navAuth = document.getElementById('nav-auth');
+      if (!navAuth) return;
+      const name = localStorage.getItem('userName');
+      if (name) {
+        navAuth.innerHTML = `<a href="#" onclick="logout()" style="color:var(--muted);font-size:14px;font-weight:500;text-decoration:none;">Hi, ${name.split(' ')[0]} · Logout</a>`;
+      } else {
+        navAuth.innerHTML = `<a href="login.html" style="color:var(--blue-bright);font-size:14px;font-weight:500;text-decoration:none;">Login</a>`;
+      }
+    })();
+
+    function logout() {
+      localStorage.removeItem('userId');
+      localStorage.removeItem('userName');
+      localStorage.removeItem('userEmail');
+      localStorage.removeItem('userRole');
+      window.location.href = 'login.html';
+    }
   </script>
 </body>
-</html>
+</html>s
